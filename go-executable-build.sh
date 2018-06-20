@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TOOLCHAIN_BASE=~/x-tools/
+TOOLCHAIN_BASE=${HOME}/x-tools/
 
 usage () {
 cat << EOF

@@ -42,7 +42,7 @@ Pre-compiled tool-chain (e.g. linaro, bootlin) can be used for building Mender c
 Use *client-cross-compilation-tool --help* command to find out supported CPUs and available options.
 
 **crosstool-ng** dependencies:
-* bison, flex, help2man, ncurses-dev
+* gperf, texinfo, bison, flex, help2man, ncurses-dev
 
 Default target directory for *crosstool-ng* based toolchain is *~/x-tools*.
 

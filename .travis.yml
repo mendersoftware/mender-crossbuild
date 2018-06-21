@@ -1,0 +1,61 @@
+language: go
+
+sudo: false
+
+os:
+    - linux
+
+go:
+    - 1.10.x
+
+env:
+  global:
+    - TOOLCHAIN=arm-cortex_a8-linux-gnueabihf
+    - TOOLCHAIN_PATH=$HOME/x-tools
+    - OS=linux
+    - ARCH=arm7
+    - MENDER=mender-$OS-$ARCH
+
+before_install:
+    - sudo apt-get install -y gperf texinfo bison flex help2man ncurses-dev
+    - go get github.com/mendersoftware/mender
+
+install: true
+
+before_script:
+
+script:
+  - |
+    ./client-cross-compilation-tool.sh build -p Cortex-A8
+    ret=$?
+    if [[ $ret -ne 0 ]]; then
+      echo -e "\nError: toolchain build failure."
+      exit $ret
+    fi
+  - |
+    if [[ ! -d "${TOOLCHAIN_PATH}/${TOOLCHAIN}" ]]; then
+      echo -e "\nError: invalid toolchain path."
+      exit 1
+    fi
+  - |
+    PATH="${PATH}:${TOOLCHAIN_PATH}/${TOOLCHAIN}/bin"
+    ./go-executable-build.sh -n github.com/mendersoftware/mender -p Cortex-A8
+    ret=$?
+    if [[ $ret -ne 0 ]]; then
+      echo -e "\nError: Mender client binary build failure."
+      exit $ret
+    fi
+  - |
+    if [[ ! -f $MENDER ]]; then
+      echo - "\nError: mender client binary not found."
+      exit 1
+    fi
+  - |
+    cpu=($($TOOLCHAIN_PATH/$TOOLCHAIN/bin/$TOOLCHAIN-readelf $MENDER -a | grep 'Tag_CPU_name' | tr -s ' ' | cut -d' ' -f3))
+    if [[ $cpu == '"Cortex-A8"' ]]; then
+      echo "Success."
+      exit 0
+    else
+      echo "Failure. Binary file attributes mismatch."
+      exit 1
+    fi
